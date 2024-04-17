@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.miniblogback.repository.MemberMapper">
+    <!--회원 가입-->
+    <insert id="createMember" parameterType="com.example.miniblogback.vo.MemberVo">
+        insert into member(nickname, email, role, provider, refresh_token, created_time, updated_time)
+        VALUES(#{nickName},#{email},#{role},#{provider},#{refreshToken},now(),now())
+    </insert>
+    <!--회원 목록-->
+    <select id="memberList" resultType="com.example.miniblogback.vo.dto.MemberDto$MemberResponse">
+        select * from member order by member_id desc
+    </select>
+    <!--로그인(이메일)-->
+    <select id="memberByEmail" parameterType="String" resultType="com.example.miniblogback.vo.MemberVo">
+        select * from member where email = #{email}
+    </select>
+    <!--토큰 조회-->
+    <select id="memberByRefreshToken" parameterType="String">
+        select * from member where refresh_token = #{refreshToken}
+    </select>
+    <!--회원 단일 조회-->
+    <select id="memberById" parameterType="Long">
+        select * from member where member_id = #{memberId}
+    </select>
+    <!--회원 이메일 중복 확인-->
+    <select id="duplicatedEmail" parameterType="String">
+        select email from member where email = #{email}
+    </select>
+    <!--회원 refreshToken 수정-->
+    <update id="updateRefreshToken" parameterType="String">
+        update
+            member
+        <set>
+            refresh_token = #{refreshToken}
+        </set>
+        <where>
+            email = #{email}
+        </where>
+    </update>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.miniblogback.repository.CommentMapper">
+
+    <!--commentList-->
+    <select id="commentList" parameterType="Long" resultType="com.example.miniblogback.vo.dto.CommentDto$CommentResponse">
+        select
+            *
+        from
+            comment c
+        where
+            board_id = #{boardId}
+    </select>
+
+    <!--commentDetail-->
+    <select id="commentDetail" resultType="com.example.miniblogback.vo.dto.CommentDto$CommentResponse">
+        select * from comment where comment_id = #{commentId}
+    </select>
+
+    <!--commentCreate-->
+    <insert id="commentCreate" parameterType="com.example.miniblogback.vo.dto.CommentDto$CommentRequest">
+        insert into comment (comment_contents, board_id, created_time, updated_time)
+        values(#{commentContents},#{boardId},now(),now())
+    </insert>
+
+    <!--comment update-->
+    <update id="commentUpdate" parameterType="com.example.miniblogback.vo.dto.CommentDto$CommentRequest">
+        update comment
+        <set>
+            <if test="commentContents neq null and commentContents neq ''">
+                comment_contents = #{commentContents}
+            </if>
+        </set>
+        <where>
+            comment_id = #{commentId}
+        </where>
+    </update>
+
+    <!--commentDelete-->
+    <delete id="commentDelete" parameterType="Long">
+        delete from comment where comment_id = #{commentId}
+    </delete>
+</mapper>

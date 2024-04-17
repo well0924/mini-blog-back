@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.miniblogback.repository.CategoryMapper">
+    <!--카테고리 목록-->
+    <select id="categoryList" resultType="com.example.miniblogback.vo.dto.CategoryDto$CategoryResponse">
+        select * from blog.category
+    </select>
+    <!--카테고리 작성-->
+    <insert id="categoryCreate" parameterType="com.example.miniblogback.vo.dto.CategoryDto$CategoryRequest">
+        insert into category(category_name,created_time,updated_time)
+        values(#{categoryName},now(),now())
+    </insert>
+    <!--카테고리 삭제-->
+    <delete id="categoryDelete" parameterType="Long">
+        delete from category c
+               where c.category_id = #{categoryId}
+    </delete>
+</mapper>

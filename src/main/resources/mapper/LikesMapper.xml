@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.miniblogback.repository.LikesMapper">
+
+    <select id="duplicatedLikes" parameterType="Long" resultType="com.example.miniblogback.vo.dto.LikeDto$LikeResponse">
+        select * from likes  l where l.board_id = #{boardId} and l.member_id = #{memberId}
+    </select>
+
+    <insert id="plusLike" parameterType="com.example.miniblogback.vo.dto.LikeDto$LikeRequest">
+        insert into likes(board_id, member_id,created_time,updated_time)values(#{boardId},#{memberId},now(),now())
+    </insert>
+
+    <delete id="minusLike" parameterType="com.example.miniblogback.vo.dto.LikeDto$LikeRequest">
+        delete from likes where board_id = #{boardId} and member_id = #{memberId}
+    </delete>
+</mapper>

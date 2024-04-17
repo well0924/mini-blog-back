@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.miniblogback.repository.BoardMapper">
+
+    <!--result Map-->
+    <resultMap id="boardRm" type="com.example.miniblogback.vo.dto.BoardDto$BoardResponseDto">
+        <id property="boardId" column="board_id"/>
+        <!--category-->
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <!--comment list-->
+        <collection property="commentResponseList"
+                    javaType="java.util.ArrayList"
+                    fetchType="eager"
+                    column="board_id"
+                    ofType="CommentDto$CommentResponse"
+                    select="commentList">
+            <id property="commentId"  column="comment_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="categoryList" resultType="com.example.miniblogback.vo.dto.CategoryDto$CategoryResponse">
+        select
+            *
+        from
+            category c
+         order by
+             c.category_id desc
+    </select>
+
+    <select id="commentList" parameterType="Long" resultType="com.example.miniblogback.vo.dto.CommentDto$CommentResponse">
+        select
+            *
+        from
+            comment c
+        where
+            board_id = #{boardId}
+        order by
+            c.comment_id desc
+    </select>
+
+    <!--board list(scroll)-->
+    <select id="boardList" parameterType="com.example.miniblogback.vo.dto.ScrollDto"  resultMap="boardRm">
+        select
+            b.board_id,b.board_title,b.board_contents,b.read_count,b.created_time,b.updated_time,
+            m.nickname as board_author,
+            c.category_id,c.category_name,
+            (select count(*) from comment c1 where c1.board_id = b.board_id) as comment_count,
+            (select count(*) from likes l where l.board_id = b.board_id) as like_count,
+            c2.comment_id, c2.comment_contents, c2.board_id,c2.created_time, c2.updated_time
+        from
+            board b
+        join
+            category c
+        on
+            b.category_id = c.category_id
+        join
+            member m
+        on
+            b.member_id = m.member_id
+        left outer join
+            comment c2
+        on
+            b.board_id = c2.comment_id
+        <!--검색기능 & 스크롤-->
+        <include refid="mapper.CommonColum.board_search"/>
+        order by
+            b.board_id desc
+        limit  0 , #{amount}
+    </select>
+
+    <!--board count (search)-->
+    <select id="boardListCount" resultType="Long">
+        select
+            count(*)
+        from
+            board b
+        left outer join
+            comment c2
+        on
+            b.board_id = c2.comment_id
+        order by
+            b.board_id desc
+    </select>
+
+    <!--board detail-->
+    <select id="boardDetail" parameterType="Long" resultType="com.example.miniblogback.vo.dto.BoardDto$BoardResponseDto">
+        select
+            *
+        from
+            board b
+        join
+            category c
+        on
+            b.category_id = c.category_id
+        left outer join
+            comment c2
+        on
+            b.board_id = c2.comment_id
+        where
+            b.board_id = #{boardId}
+    </select>
+
+    <!--board create-->
+    <insert id="boardCreate" parameterType="com.example.miniblogback.vo.dto.BoardDto$BoardRequestDto">
+        insert into board(
+            board_title,
+            board_contents,
+            board_author,
+            category_id,
+            read_count,
+            created_time,
+            updated_time
+        )values(#{boardTitle},#{boardContents},#{boardAuthor},#{categoryId},0,now(),now())
+    </insert>
+
+    <!--board update-->
+    <update id="boardUpdate" parameterType="com.example.miniblogback.vo.dto.BoardDto$BoardRequestDto">
+        update
+            board
+        <set>
+            <if test="boardTitle neq null and boardTitle neq ''">
+                board_title = #{boardTitle},
+            </if>
+            <if test="boardContents neq null and boardContents neq ''">
+                board_contents = #{boardContents}
+            </if>
+        </set>
+        <where>
+            board_id = #{boardId}
+        </where>
+    </update>
+
+    <!--board delete-->
+    <delete id="boardDelete" parameterType="Long">
+        delete from board b where b.board_id = #{boardId}
+    </delete>
+
+    <!--board read count-->
+    <update id="boardReadCount" parameterType="Long">
+        update
+            board
+        <set>
+            read_count = read_count + 1
+        </set>
+        <where>
+            board_id = #{board_id}
+        </where>
+    </update>
+</mapper>
